@@ -1,0 +1,88 @@
+1. Before Insert Trigger
+Automatically adjust values before inserting new records.
+CREATE TABLE passengers (
+  Name VARCHAR(20),
+  id INT(10),
+  address VARCHAR(20),
+  charges INT(10),
+  PRIMARY KEY(id)
+);
+
+-- Example data insertion with charges adjustment
+INSERT INTO passengers (Name, id, address, charges) VALUES 
+('John Doe', 1, '123 Main St', 50),
+('Jane Smith', 2, '456 Elm St', 75);
+
+CREATE TRIGGER adjust_charges
+BEFORE INSERT ON passengers
+FOR EACH ROW
+SET NEW.charges = NEW.charges - 20;
+
+-- Insert to see the trigger in action
+INSERT INTO passengers (Name, id, address, charges) VALUES 
+('Alice Smith', 11, '456 Pine St', 70);
+
+
+2. After Insert Trigger
+Log the insertion events automatically for auditing purposes.
+CREATE TABLE colstu (
+  id INT(10),
+  Name VARCHAR(20),
+  Age INT(10),
+  PRIMARY KEY(id)
+);
+
+CREATE TABLE audstu (
+  id INT(10),
+  auditdescr VARCHAR(500),
+  PRIMARY KEY(id)
+);
+
+CREATE TRIGGER after_insert_audit
+AFTER INSERT ON colstu
+FOR EACH ROW
+INSERT INTO audstu VALUES (NEW.id, CONCAT('Inserted a new row on ', DATE_FORMAT(NOW(), '%d-%m-%y %h:%i:%s %p')));
+
+-- Insert to see the trigger in action
+INSERT INTO colstu VALUES (1, 'Shubham', 23);
+
+3. Before Update Trigger
+Ensure business rules are enforced before updating records.
+CREATE TABLE workers (
+  id INT(10),
+  name VARCHAR(10),
+  income INT(10),
+  PRIMARY KEY(id)
+);
+
+INSERT INTO workers VALUES (1, 'Manish', 100000);
+
+-- Ensure income is not set below a certain threshold
+CREATE TRIGGER enforce_min_income
+BEFORE UPDATE ON workers
+FOR EACH ROW
+BEGIN
+  IF NEW.income < 12000 THEN
+    SET NEW.income = 12000;
+  END IF;
+END;
+
+-- Update to see the trigger in action
+UPDATE workers SET income = 11000 WHERE id = 1;
+
+4. After Update Trigger
+Keep an audit trail of updates automatically.
+CREATE TABLE auditemp (
+  id INT(10),
+  auddesc VARCHAR(1000),
+  PRIMARY KEY(id)
+);
+
+CREATE TRIGGER after_update_audit
+AFTER UPDATE ON workers
+FOR EACH ROW
+INSERT INTO auditemp VALUES (NEW.id, CONCAT('Updated row at ', DATE_FORMAT(NOW(), '%d-%m-%y %h:%i:%s %p')));
+
+-- Update to see the trigger in action
+INSERT INTO workers VALUES (2, 'Shubham', 90000);
+UPDATE workers SET income = 42000 WHERE id = 2;
